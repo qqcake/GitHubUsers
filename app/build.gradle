@@ -77,6 +77,9 @@ dependencies {
     implementation 'com.squareup.moshi:moshi-kotlin:1.13.0'
     kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.13.0'
 
+    // Coil
+    implementation 'io.coil-kt:coil-compose:2.2.0'
+
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

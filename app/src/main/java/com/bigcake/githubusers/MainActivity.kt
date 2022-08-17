@@ -4,26 +4,38 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import com.bigcake.githubusers.domain.entity.User
 import com.bigcake.githubusers.ui.theme.GitHubUsersTheme
 import com.bigcake.githubusers.ui.theme.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -74,40 +86,84 @@ fun UserList(viewModel: UserViewModel) {
         modifier = Modifier.fillMaxSize()
     ) {
         val loginFilterText = viewModel.state.loginFilterText
-        var filteredUsers = if (loginFilterText.isEmpty()) {
+        val filteredUsers = if (loginFilterText.isEmpty()) {
             viewModel.state.users
         } else {
             viewModel.state.users.filter { user -> user.login.contains(loginFilterText) }
         }
-        items(filteredUsers.size) { i ->
-            val user = filteredUsers[i]
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = user.id.toString(),
-                    fontSize = 20.sp,
-                    color = Color.Black
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(user.login)
-            }
+        items(filteredUsers, itemContent = { UserItem(user = it) })
+    }
+    Pagination(listState = listState) {
+        viewModel.loadUsers()
+    }
+}
 
+@Composable
+fun UserItem(user: User) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        UserAvatar(user = user)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .align(Alignment.CenterVertically)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(user.login, style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.width(8.dp))
+                if (user.isSiteAdmin)
+                    LabelText(text = "Site Admin")
+            }
+            Text(text = user.id.toString(), style = MaterialTheme.typography.bodyMedium)
         }
     }
+}
+
+@Composable
+fun UserAvatar(user: User) {
+    AsyncImage(
+        model = user.avatar,
+        contentDescription = user.login,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .size(84.dp)
+            .padding(8.dp)
+            .clip(RoundedCornerShape(corner = CornerSize(16.dp))),
+    )
+}
+
+@Composable
+fun LabelText(text: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = contentColorFor(backgroundColor = MaterialTheme.colorScheme.primary),
+        shape = RoundedCornerShape(50),
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+        )
+    }
+}
+
+@Composable
+fun Pagination(
+    listState: LazyListState,
+    buffer: Int = 5,
+    onLoadMore: () -> Unit
+) {
     val loadMore by remember {
         derivedStateOf {
             val layoutInfo = listState.layoutInfo
             val totalItemsNumber = layoutInfo.totalItemsCount
             val lastVisibleItemIndex = (layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) + 1
-            lastVisibleItemIndex > (totalItemsNumber - 2)
+            lastVisibleItemIndex > (totalItemsNumber - buffer)
         }
     }
     LaunchedEffect(loadMore) {
         if (loadMore) {
-            viewModel.loadUsers()
+            onLoadMore()
         }
     }
 }
