@@ -1,8 +1,11 @@
 package com.bigcake.githubusers
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +14,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+
+import androidx.compose.material.Surface
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -34,8 +42,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            GitHubUsersTheme {
-                UserScreen()
+            GitHubUsersTheme(dynamicColor = false) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    UserScreen()
+                }
             }
         }
     }
@@ -61,7 +74,7 @@ fun LoginFilter(
     TextField(
         value = viewModel.state.loginFilterText,
         onValueChange = onLoginFilterTextChanged,
-        label = { Text(text = "Your Label") },
+        label = { Text(text = "Filter by login") },
         modifier = Modifier.fillMaxWidth()
     )
 }
@@ -74,7 +87,7 @@ fun UserList(viewModel: UserViewModel) {
         modifier = Modifier.fillMaxSize()
     ) {
         val loginFilterText = viewModel.state.loginFilterText
-        var filteredUsers = if (loginFilterText.isEmpty()) {
+        val filteredUsers = if (loginFilterText.isEmpty()) {
             viewModel.state.users
         } else {
             viewModel.state.users.filter { user -> user.login.contains(loginFilterText) }
@@ -89,7 +102,7 @@ fun UserList(viewModel: UserViewModel) {
                 Text(
                     text = user.id.toString(),
                     fontSize = 20.sp,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(user.login)
@@ -106,6 +119,7 @@ fun UserList(viewModel: UserViewModel) {
         }
     }
     LaunchedEffect(loadMore) {
+        Log.d("Martin", "loadMore=$loadMore")
         if (loadMore) {
             viewModel.loadUsers()
         }
