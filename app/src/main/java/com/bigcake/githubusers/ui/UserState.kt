@@ -8,4 +8,5 @@ data class UserState(
     val nextPageKey: Int = 0,
     val loginFilterText: String = "",
     val isLoading: Boolean = false,
+    val error: String = "",
 )
