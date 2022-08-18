@@ -1,4 +1,4 @@
-package com.bigcake.githubusers.ui.theme
+package com.bigcake.githubusers.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

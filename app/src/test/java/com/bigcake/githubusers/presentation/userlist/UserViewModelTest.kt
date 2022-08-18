@@ -1,8 +1,8 @@
-package com.bigcake.githubusers.ui
+package com.bigcake.githubusers.presentation.userlist
 
-import com.bigcake.githubusers.domain.entity.Result
+import com.bigcake.githubusers.domain.PageResult
 import com.bigcake.githubusers.domain.entity.User
-import com.bigcake.githubusers.domain.usecase.GetUserByPage
+import com.bigcake.githubusers.domain.usecase.GetUsersUseCase
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(UserViewModelTestExtension::class)
 class UserViewModelTest {
     @MockK
-    private lateinit var mockGetUserByPage: GetUserByPage
+    private lateinit var mockGetUsersUseCase: GetUsersUseCase
 
     private lateinit var subjectViewModel: UserViewModel
 
@@ -32,7 +32,7 @@ class UserViewModelTest {
         MockKAnnotations.init(this)
 
         // Inject mock use case
-        subjectViewModel = UserViewModel(mockGetUserByPage)
+        subjectViewModel = UserViewModel(mockGetUsersUseCase)
     }
 
     @AfterEach
@@ -51,7 +51,7 @@ class UserViewModelTest {
         subjectViewModel.onLoginFilterTextChanged(loginFilterText)
 
         // Then
-        coVerify { mockGetUserByPage.invoke(0, any()) }
+        coVerify { mockGetUsersUseCase.invoke(0, any()) }
         Assertions.assertEquals(1, subjectViewModel.state.filteredUsers.size)
         Assertions.assertEquals(5, subjectViewModel.state.filteredUsers[0].id)
         Assertions.assertEquals(loginFilterText, subjectViewModel.state.loginFilterText)
@@ -68,14 +68,14 @@ class UserViewModelTest {
         subjectViewModel.onLoginFilterTextChanged(loginFilterText)
 
         // Then
-        coVerify { mockGetUserByPage.invoke(0, any()) }
+        coVerify { mockGetUsersUseCase.invoke(0, any()) }
         Assertions.assertTrue(subjectViewModel.state.filteredUsers.isEmpty())
         Assertions.assertEquals(loginFilterText, subjectViewModel.state.loginFilterText)
     }
 
     private fun givenDummyUsers() {
-        coEvery { mockGetUserByPage.invoke(any(), any()) } returns flow {
-            emit(Result.Page(5, DUMMY_USERS))
+        coEvery { mockGetUsersUseCase.invoke(any(), any()) } returns flow {
+            emit(PageResult.Page(5, DUMMY_USERS))
         }
         subjectViewModel.loadUsers()
     }

@@ -1,4 +1,4 @@
-package com.bigcake.githubusers.ui.theme
+package com.bigcake.githubusers.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build

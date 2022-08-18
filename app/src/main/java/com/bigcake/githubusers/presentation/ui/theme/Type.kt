@@ -1,4 +1,4 @@
-package com.bigcake.githubusers.ui.theme
+package com.bigcake.githubusers.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

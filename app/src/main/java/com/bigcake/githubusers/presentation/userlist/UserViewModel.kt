@@ -1,12 +1,12 @@
-package com.bigcake.githubusers.ui
+package com.bigcake.githubusers.presentation.userlist
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bigcake.githubusers.domain.entity.Result
-import com.bigcake.githubusers.domain.usecase.GetUserByPage
+import com.bigcake.githubusers.domain.PageResult
+import com.bigcake.githubusers.domain.usecase.GetUsersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -14,22 +14,22 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val getUserByPage: GetUserByPage
+    private val getUsersUseCase: GetUsersUseCase
 ) : ViewModel() {
-    var state by mutableStateOf(UserState())
+    var state by mutableStateOf(UserListState())
         private set
 
     fun loadUsers() {
-        getUserByPage.invoke(state.nextPageKey, 20).onEach { result ->
+        getUsersUseCase.invoke(state.nextPageKey, 20).onEach { result ->
             state = when (result) {
-                is Result.Page -> {
+                is PageResult.Page -> {
                     val newState = state.copy(
                         users = state.users + result.data,
                         nextPageKey = result.next
                     )
                     newState
                 }
-                is Result.Failure -> {
+                is PageResult.Failure -> {
                     state.copy(error = result.message)
                 }
             }

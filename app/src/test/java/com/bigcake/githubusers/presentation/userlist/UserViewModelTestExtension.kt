@@ -1,4 +1,4 @@
-package com.bigcake.githubusers.ui
+package com.bigcake.githubusers.presentation.userlist
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
