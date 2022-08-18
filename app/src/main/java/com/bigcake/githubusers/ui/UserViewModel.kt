@@ -1,8 +1,7 @@
-package com.bigcake.githubusers.ui.theme
+package com.bigcake.githubusers.ui
 
-import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,10 +16,8 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(
     private val getUserByPage: GetUserByPage
 ) : ViewModel() {
-    //    private val _state = mutableStateOf(UserState())
     var state by mutableStateOf(UserState())
         private set
-
 
     fun loadUsers() {
         getUserByPage.invoke(state.nextPageKey, 20).onEach { result ->
@@ -30,17 +27,23 @@ class UserViewModel @Inject constructor(
                         users = state.users + result.data,
                         nextPageKey = result.next
                     )
-                    Log.d("Martin", "xxx ${newState.users.size}")
                     state = newState
                 }
                 is Result.Failure -> {
-                    Log.d("Martin", "yyy")
+
                 }
             }
         }.launchIn(viewModelScope)
     }
 
     fun onLoginFilterTextChanged(text: String) {
-        state = state.copy(loginFilterText = text)
+        state = if (text.isEmpty()) {
+            state.copy(loginFilterText = "", filteredUsers = emptyList())
+        } else {
+            state.copy(
+                loginFilterText = text,
+                filteredUsers = state.users.filter { user -> user.login.contains(text) }
+            )
+        }
     }
 }

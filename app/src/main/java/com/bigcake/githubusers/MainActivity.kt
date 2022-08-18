@@ -3,11 +3,16 @@ package com.bigcake.githubusers
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,13 +36,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.bigcake.githubusers.domain.entity.User
 import com.bigcake.githubusers.ui.theme.GitHubUsersTheme
-import com.bigcake.githubusers.ui.theme.UserViewModel
+import com.bigcake.githubusers.ui.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @ExperimentalMaterial3Api
@@ -73,7 +80,7 @@ fun LoginFilter(
     TextField(
         value = viewModel.state.loginFilterText,
         onValueChange = onLoginFilterTextChanged,
-        label = { Text(text = "Your Label") },
+        label = { Text(text = "Filter by login") },
         modifier = Modifier.fillMaxWidth()
     )
 }
@@ -86,12 +93,15 @@ fun UserList(viewModel: UserViewModel) {
         modifier = Modifier.fillMaxSize()
     ) {
         val loginFilterText = viewModel.state.loginFilterText
-        val filteredUsers = if (loginFilterText.isEmpty()) {
+        val users = if (loginFilterText.isEmpty()) {
             viewModel.state.users
         } else {
-            viewModel.state.users.filter { user -> user.login.contains(loginFilterText) }
+            viewModel.state.filteredUsers
         }
-        items(filteredUsers, itemContent = { UserItem(user = it) })
+        items(users, itemContent = { UserItem(user = it) })
+        if (loginFilterText.isNotEmpty() && users.isEmpty()) {
+            item { NoResultNotice(loginFilterText = loginFilterText) }
+        }
     }
     Pagination(listState = listState) {
         viewModel.loadUsers()
@@ -117,6 +127,17 @@ fun UserItem(user: User) {
             Text(text = user.id.toString(), style = MaterialTheme.typography.bodyMedium)
         }
     }
+}
+
+@Composable
+fun NoResultNotice(loginFilterText: String) {
+    Text(
+        text = "Login '$loginFilterText' not found",
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    )
 }
 
 @Composable
