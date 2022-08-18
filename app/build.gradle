@@ -24,7 +24,7 @@ android {
         }
 
         buildConfigField 'String', 'BASE_URL', '"https://api.github.com"'
-        buildConfigField 'String', 'AUTH_TOKEN', localProperties['accessToken']
+        buildConfigField 'String', 'AUTH_TOKEN', localProperties.getProperty('accessToken', '""')
     }
 
     buildTypes {
