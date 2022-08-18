@@ -16,12 +16,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -38,6 +37,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.bigcake.githubusers.domain.entity.User
 import com.bigcake.githubusers.presentation.Screen
+import com.bigcake.githubusers.presentation.composable.LabelText
 
 @ExperimentalMaterial3Api
 @Composable
@@ -55,7 +55,7 @@ fun UserListScreen(
         if (viewModel.state.error.isNotBlank()) {
             Text(
                 text = viewModel.state.error,
-                color = MaterialTheme.colors.error,
+                color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -101,9 +101,14 @@ fun UserList(navController: NavController, viewModel: UserViewModel) {
         if (loginFilterText.isNotEmpty() && users.isEmpty()) {
             item { NoResultNotice(loginFilterText = loginFilterText) }
         }
+        if (viewModel.state.isLoading) {
+            item { LoadingIndicator() }
+        }
     }
     Pagination(listState = listState) {
-        viewModel.loadUsers()
+        if (!viewModel.state.isLoading) {
+            viewModel.loadUsers()
+        }
     }
 }
 
@@ -120,7 +125,7 @@ fun UserItem(user: User, onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     user.login,
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 if (user.isSiteAdmin)
@@ -128,7 +133,7 @@ fun UserItem(user: User, onClick: () -> Unit) {
             }
             Text(
                 text = user.id.toString(),
-                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
@@ -138,11 +143,26 @@ fun UserItem(user: User, onClick: () -> Unit) {
 fun NoResultNotice(loginFilterText: String) {
     Text(
         text = "Login '$loginFilterText' not found",
-        style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.titleMedium,
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     )
+}
+
+@Composable
+fun LoadingIndicator() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+        )
+    }
 }
 
 @Composable
@@ -156,21 +176,6 @@ fun UserAvatar(user: User) {
             .padding(8.dp)
             .clip(RoundedCornerShape(corner = CornerSize(16.dp))),
     )
-}
-
-@Composable
-fun LabelText(text: String) {
-    Surface(
-        color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-        contentColor = contentColorFor(backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.primary),
-        shape = RoundedCornerShape(50),
-    ) {
-        Text(
-            text = text,
-            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-        )
-    }
 }
 
 @Composable

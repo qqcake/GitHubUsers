@@ -20,17 +20,19 @@ class UserViewModel @Inject constructor(
         private set
 
     fun loadUsers() {
+        state = state.copy(isLoading = true)
         getUsersUseCase.invoke(state.nextPageKey, 20).onEach { result ->
             state = when (result) {
                 is PageResult.Page -> {
                     val newState = state.copy(
                         users = state.users + result.data,
-                        nextPageKey = result.next
+                        nextPageKey = result.next,
+                        isLoading = false
                     )
                     newState
                 }
                 is PageResult.Failure -> {
-                    state.copy(error = result.message)
+                    state.copy(error = result.message, isLoading = false)
                 }
             }
         }.launchIn(viewModelScope)

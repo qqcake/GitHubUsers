@@ -12,6 +12,7 @@ fun UserDto.toDomain(): User {
 fun UserDetailDto.toDomain(): UserDetail {
     return UserDetail(
         name = name,
+        isSiteAdmin = siteAdmin ?: false,
         avatar = avatarUrl,
         bio = bio,
         gitHubId = login ?: "",
