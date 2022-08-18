@@ -18,3 +18,4 @@ A simple project fetching user list and user profile from https://api.github.com
 ### To-dos
 - Refine theming
 - Screen transition
+- Filter UX
